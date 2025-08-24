@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import express, { Express, Request, Response, NextFunction } from "express";
-import helmet from "helmet";
+// import helmet from "helmet"; // DÉSACTIVÉ TEMPORAIREMENT
 import { loggingMiddleware } from "./middleware/logging.middleware";
 import routes from "./routes";
 
@@ -11,6 +11,8 @@ const PORT: number = parseInt(process.env.PORT || "3000", 10);
 
 // Configuration CORS manuelle - DOIT être en PREMIER
 app.use((req: Request, res: Response, next: NextFunction) => {
+  console.log('CORS Middleware - Method:', req.method, 'URL:', req.url); // Debug
+  
   // Autoriser toutes les origines pour le moment (on peut restreindre plus tard)
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
@@ -20,6 +22,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   
   // Gestion des requêtes OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
+    console.log('OPTIONS request handled - sending 200'); // Debug
     res.sendStatus(200);
     return;
   }
@@ -27,8 +30,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Middleware - Helmet APRÈS CORS pour éviter les conflits
-app.use(helmet());
+// Middleware - Helmet DÉSACTIVÉ temporairement
+// app.use(helmet()); // DÉSACTIVÉ
 app.use(loggingMiddleware);
 app.use(express.json());
 
