@@ -27,7 +27,7 @@ postgres_data/
 Thumbs.db
 
 # Build
-dist/
+dist/*
 build/
 coverage/
 
