@@ -1,6 +1,5 @@
 import dotenv from "dotenv";
 import express, { Express, Request, Response, NextFunction } from "express";
-// import helmet from "helmet"; // DÉSACTIVÉ TEMPORAIREMENT
 import { loggingMiddleware } from "./middleware/logging.middleware";
 import routes from "./routes";
 
@@ -9,20 +8,13 @@ dotenv.config();
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT || "3000", 10);
 
-// Configuration CORS manuelle - DOIT être en PREMIER
+// Configuration CORS ultra-simple
 app.use((req: Request, res: Response, next: NextFunction) => {
-  console.log('CORS Middleware - Method:', req.method, 'URL:', req.url); // Debug
-  
-  // Autoriser toutes les origines pour le moment (on peut restreindre plus tard)
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, Referer, accept-language, priority, sec-fetch-dest, sec-fetch-mode, sec-fetch-site');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400'); // 24 heures
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Allow-Headers', '*');
   
-  // Gestion des requêtes OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
-    console.log('OPTIONS request handled - sending 200'); // Debug
     res.sendStatus(200);
     return;
   }
@@ -30,10 +22,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Middleware - Helmet DÉSACTIVÉ temporairement
-// app.use(helmet()); // DÉSACTIVÉ
-app.use(loggingMiddleware);
 app.use(express.json());
+app.use(loggingMiddleware);
 
 // Routes
 app.use("/api", routes);
