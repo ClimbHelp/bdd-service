@@ -1,4 +1,18 @@
 import { Request, Response } from 'express';
+
+// Mock des modules avant les imports pour éviter les erreurs d'environnement
+jest.mock('../../config/supabase', () => ({
+  supabase: {
+    from: jest.fn()
+  }
+}));
+
+jest.mock('../../services/log.service', () => ({
+  LogService: {
+    insertHttpLogAsync: jest.fn()
+  }
+}));
+
 import { SalleController } from '../../controllers/salle.controller';
 
 // Mock simple des services
@@ -18,8 +32,6 @@ jest.mock('../../services/supabase.service', () => ({
     delete: jest.fn()
   }
 }));
-
-jest.mock('../../services/log.service');
 
 describe('SalleController', () => {
   let mockRequest: Partial<Request>;

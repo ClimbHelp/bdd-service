@@ -1,4 +1,18 @@
 import { Request, Response } from 'express';
+
+// Mock des modules avant les imports pour éviter les erreurs d'environnement
+jest.mock('../../config/supabase', () => ({
+  supabase: {
+    from: jest.fn()
+  }
+}));
+
+jest.mock('../../services/log.service', () => ({
+  LogService: {
+    insertHttpLogAsync: jest.fn()
+  }
+}));
+
 import { UserController } from '../../controllers/user.controller';
 
 // Mock simple des services
@@ -19,7 +33,6 @@ jest.mock('../../services/supabase.service', () => ({
   }
 }));
 
-jest.mock('../../services/log.service');
 jest.mock('bcrypt');
 jest.mock('jsonwebtoken');
 

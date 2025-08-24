@@ -6,6 +6,7 @@ beforeAll(() => {
   // Variables d'environnement de test par défaut
   process.env.SUPABASE_URL = 'https://test.supabase.co';
   process.env.SUPABASE_ANON_KEY = 'test-anon-key';
+  process.env.SUPABASE_KEY = 'test-service-key';
 });
 
 afterAll(() => {
