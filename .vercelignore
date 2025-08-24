@@ -19,3 +19,5 @@ logs
 .DS_Store
 .vscode
 .idea
+src/__tests__
+src/scripts
