@@ -6,8 +6,8 @@ import { LogService, HttpLog } from '../services/log.service';
 function getClientIp(req: Request): string {
   return req.headers['x-forwarded-for'] as string || 
          req.headers['x-real-ip'] as string || 
-         req.connection.remoteAddress || 
-         req.socket.remoteAddress || 
+         (req.connection?.remoteAddress as string) || 
+         (req.socket?.remoteAddress as string) || 
          'unknown';
 }
 
