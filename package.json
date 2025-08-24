@@ -7,6 +7,7 @@
     "start": "node dist/index.js",
     "dev": "nodemon",
     "build": "tsc",
+    "vercel-build": "npm run build",
     "watch": "tsc -w",
     "test": "jest",
     "seed": "ts-node src/scripts/seed-users.ts",

@@ -1,0 +1,102 @@
+# Pipeline pour le service de base de données
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  DOCKER_REGISTRY: "registry.gitlab.com"
+  DOCKER_IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+# Cache pour les dépendances
+cache:
+  paths:
+    - node_modules/
+    - .npm/
+
+# Tests
+test:
+  stage: test
+  image: node:18-alpine
+  services:
+    - postgres:15
+  variables:
+    POSTGRES_DB: bdd_test
+    POSTGRES_USER: test_user
+    POSTGRES_PASSWORD: test_password
+    NODE_ENV: test
+  script:
+    - npm ci
+    - npm run test
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
+    paths:
+      - coverage/
+    expire_in: 1 week
+  only:
+    - main
+    - develop
+    - merge_requests
+
+# Build de l'image Docker
+build:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  variables:
+    DOCKER_TLS_CERTDIR: "/certs"
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA .
+    - docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - main
+    - develop
+
+# Déploiement en staging
+deploy-staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl docker-cli
+  script:
+    - echo "Déploiement du service de base de données en staging..."
+    - |
+      # Ici vous pouvez ajouter vos commandes de déploiement
+      echo "Service de base de données déployé:"
+      echo "- Image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+      echo "- Port: 3001"
+      echo "- Environnement: staging"
+  environment:
+    name: staging
+    url: https://bdd-staging.votre-app.com
+  only:
+    - develop
+
+# Déploiement en production
+deploy-production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl docker-cli
+  script:
+    - echo "Déploiement du service de base de données en production..."
+    - |
+      # Ici vous pouvez ajouter vos commandes de déploiement
+      echo "Service de base de données déployé:"
+      echo "- Image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+      echo "- Port: 3001"
+      echo "- Environnement: production"
+  environment:
+    name: production
+    url: https://bdd.votre-app.com
+  when: manual
+  only:
+    - main
