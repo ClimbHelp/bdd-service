@@ -40,6 +40,30 @@ const allowedOrigins = [
   'https://monitoring-service-climb-help.vercel.app',
 ];
 
+// Middleware CORS manuel - DOIT être en premier
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const origin = req.headers.origin;
+  
+  // Vérifier si l'origine est autorisée
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  
+  // Headers CORS
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Max-Age', '86400'); // 24 heures
+  
+  // Gestion des requêtes OPTIONS (preflight)
+  if (req.method === 'OPTIONS') {
+    res.status(200).end();
+    return;
+  }
+  
+  next();
+});
+
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
