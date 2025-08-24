@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "dev": "nodemon",
     "build": "tsc",
-    "vercel-build": "tsc -p tsconfig.prod.json && echo 'Build completed successfully'",
+    "vercel-build": "tsc -p tsconfig.prod.json",
     "watch": "tsc -w",
     "test": "jest",
     "test:watch": "jest --watch",
