@@ -9,13 +9,14 @@ dotenv.config();
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT || "3000", 10);
 
-// Configuration CORS manuelle - APPROCHE SIMPLE ET ROBUSTE
+// Configuration CORS manuelle - DOIT être en PREMIER
 app.use((req: Request, res: Response, next: NextFunction) => {
   // Autoriser toutes les origines pour le moment (on peut restreindre plus tard)
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, sec-ch-ua, sec-ch-ua-mobile, sec-ch-ua-platform, Referer, accept-language, priority, sec-fetch-dest, sec-fetch-mode, sec-fetch-site');
   res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400'); // 24 heures
   
   // Gestion des requêtes OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
@@ -26,7 +27,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// Middleware
+// Middleware - Helmet APRÈS CORS pour éviter les conflits
 app.use(helmet());
 app.use(loggingMiddleware);
 app.use(express.json());
