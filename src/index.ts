@@ -94,8 +94,8 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 module.exports = app;
 
 // Démarrage du serveur seulement en développement
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
-}
+// if (process.env.NODE_ENV !== 'production') {
+//   app.listen(PORT, () => {
+//     console.log(`Server is running on port ${PORT}`);
+//   });
+// }
