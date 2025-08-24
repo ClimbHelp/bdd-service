@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import express, { Express, Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { loggingMiddleware } from "./middleware/logging.middleware";
+// import { loggingMiddleware } from "./middleware/logging.middleware"; // DÉSACTIVÉ TEMPORAIREMENT
 import routes from "./routes";
 
 dotenv.config();
@@ -10,60 +10,31 @@ dotenv.config();
 const app: Express = express();
 const PORT: number = parseInt(process.env.PORT || "3000", 10);
 
-// Configuration CORS avec Express cors()
-const corsOptions = {
-  origin: [
-    // Développement local
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'http://localhost:3002',
-    'http://localhost:3003',
-    'http://localhost:3004',
-    'http://localhost:3005',
-    'http://localhost:3006',
-    'http://localhost:3010',
-    
-    // Staging Vercel
-    'https://front-env-staging-climb-help.vercel.app',
-    'https://autentication-service-git-develop-climb-help.vercel.app',
-    'https://ai-service-git-develop-climb-help.vercel.app',
-    'https://payment-service-git-develop-climb-help.vercel.app',
-    'https://notifications-service-git-develop-climb-help.vercel.app',
-    'https://monitoring-service-git-develop-climb-help.vercel.app',
-    
-    // Production Vercel
-    'https://front-climb-help.vercel.app',
-    'https://climb-help.vercel.app',
-    'https://autentication-service-climb-help.vercel.app',
-    'https://ai-service-climb-help.vercel.app',
-    'https://payment-service-climb-help.vercel.app',
-    'https://notifications-service-climb-help.vercel.app',
-    'https://monitoring-service-climb-help.vercel.app',
-  ],
+// Configuration CORS simple et robuste
+app.use(cors({
+  origin: true, // Autoriser toutes les origines pour le moment
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'sec-ch-ua', 'sec-ch-ua-mobile', 'sec-ch-ua-platform', 'Referer', 'accept-language', 'priority', 'sec-fetch-dest', 'sec-fetch-mode', 'sec-fetch-site'],
-  optionsSuccessStatus: 200
-};
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+}));
 
 // Middleware
-app.use(cors(corsOptions));
 app.use(helmet());
-app.use(loggingMiddleware);
+// app.use(loggingMiddleware); // DÉSACTIVÉ TEMPORAIREMENT
 app.use(express.json());
+
+// Route de test simple
+app.get("/health", (req: Request, res: Response) => {
+  res.json({ status: "OK", service: "bdd-service", timestamp: new Date().toISOString() });
+});
 
 // Routes
 app.use("/api", routes);
 
-// Route de test
-app.get("/health", (req: Request, res: Response) => {
-  return res.json({ status: "OK", service: "bdd-service" });
-});
-
 // Gestion des erreurs
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
-  return res.status(500).json({ error: "Something went wrong!" });
+  res.status(500).json({ error: "Something went wrong!" });
 });
 
 // Export pour Vercel serverless
