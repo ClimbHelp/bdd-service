@@ -31,7 +31,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Export pour Vercel serverless
-export default app;
+module.exports = app;
 
 // Démarrage du serveur seulement en développement
 if (process.env.NODE_ENV !== 'production') {

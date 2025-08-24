@@ -21,3 +21,4 @@ logs
 .idea
 src/__tests__
 src/scripts
+api/
