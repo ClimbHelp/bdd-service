@@ -5,7 +5,7 @@ export const getServiceUrls = () => {
   
   if (isProduction) {
     return {
-      notificationsService: 'https://notifications-service-climb-help.vercel.app',
+      notificationsService: 'https://notification-service-u6b3.onrender.com',
       frontendUrl: 'https://front-climb-help.vercel.app'
     };
   }
