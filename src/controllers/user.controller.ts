@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { userService, User } from '../services/supabase.service';
 import { LogService, HttpLog } from '../services/log.service';
+import { getServiceUrls } from '../config/services';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
@@ -12,21 +13,18 @@ interface NotificationResponse {
 // Fonction pour envoyer un email de bienvenue
 async function sendWelcomeEmail(userEmail: string, username: string, userId: number) {
   try {
-    const notificationData = {
-      title: "Bienvenue sur ClimbHelp ! 🧗‍♂️",
-      message: `Félicitations ${username} ! Votre compte ClimbHelp a été créé avec succès. Vous pouvez maintenant accéder à toutes nos fonctionnalités pour améliorer votre escalade.`,
-      userId: userId.toString(),
+    const serviceUrls = getServiceUrls();
+    const welcomeEmailData = {
       userEmail: userEmail,
-      userName: username,
-      sendEmail: true
+      firstName: username
     };
 
-    const response = await fetch('http://localhost:3005/api/notifications', {
+    const response = await fetch(`${serviceUrls.notificationsService}/api/notifications/welcome-email`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(notificationData),
+      body: JSON.stringify(welcomeEmailData),
     });
 
     if (!response.ok) {
@@ -36,7 +34,7 @@ async function sendWelcomeEmail(userEmail: string, username: string, userId: num
       // Logger l'erreur dans la table http_logs existante
       const emailLog: HttpLog = {
         method: 'EMAIL',
-        url: 'http://localhost:3005/api/notifications',
+        url: `${serviceUrls.notificationsService}/api/notifications/welcome-email`,
         status_code: response.status,
         response_time_ms: 0,
         user_id: userId,
@@ -54,7 +52,7 @@ async function sendWelcomeEmail(userEmail: string, username: string, userId: num
       // Logger le succès dans la table http_logs existante
       const emailLog: HttpLog = {
         method: 'EMAIL',
-        url: 'http://localhost:3005/api/notifications',
+        url: `${serviceUrls.notificationsService}/api/notifications/welcome-email`,
         status_code: response.status,
         response_time_ms: 0,
         user_id: userId,
@@ -62,7 +60,7 @@ async function sendWelcomeEmail(userEmail: string, username: string, userId: num
         log_type: 'email',
         email_type: 'welcome_email',
         user_email: userEmail,
-        notification_id: responseData.id
+        notification_id: responseData.messageId || 'welcome-email'
       };
       LogService.insertHttpLogAsync(emailLog);
     }
@@ -71,9 +69,10 @@ async function sendWelcomeEmail(userEmail: string, username: string, userId: num
     console.error('Error sending welcome email:', error);
     
     // Logger l'erreur dans la table http_logs existante
+    const serviceUrls = getServiceUrls();
     const emailLog: HttpLog = {
       method: 'EMAIL',
-      url: 'http://localhost:3005/api/notifications',
+      url: `${serviceUrls.notificationsService}/api/notifications/welcome-email`,
       status_code: 500,
       response_time_ms: 0,
       user_id: userId,
