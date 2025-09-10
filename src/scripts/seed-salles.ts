@@ -8,49 +8,53 @@ dotenv.config();
 const cleanTables = async (): Promise<void> => {
   await supabase.from("voie").delete().neq("id", 0);
   await supabase.from("voies").delete().neq("id", 0);
+  await supabase.from("seances").delete().neq("id", 0);
   await supabase.from("salles").delete().neq("id", 0);
   await supabase.from("localisation").delete().neq("id", 0);
   console.log("✅ Tables nettoyées avec succès");
 };
 
-// Liste de villes françaises avec coordonnées
-const frenchCities = [
-  { name: "Paris", latitude: 48.8566, longitude: 2.3522 },
-  { name: "Lyon", latitude: 45.7640, longitude: 4.8357 },
-  { name: "Marseille", latitude: 43.2965, longitude: 5.3698 },
-  { name: "Toulouse", latitude: 43.6047, longitude: 1.4442 },
-  { name: "Nice", latitude: 43.7102, longitude: 7.2620 },
-  { name: "Nantes", latitude: 47.2184, longitude: -1.5536 },
-  { name: "Strasbourg", latitude: 48.5734, longitude: 7.7521 },
-  { name: "Montpellier", latitude: 43.6119, longitude: 3.8777 },
-  { name: "Bordeaux", latitude: 44.8378, longitude: -0.5792 },
-  { name: "Lille", latitude: 50.6292, longitude: 3.0573 }
+const frenchClimbingGyms = [
+  { name: "Climb Up - Brest", latitude: 48.3899, longitude: -4.4861 },
+  { name: "Block Out - Nantes", latitude: 47.2184, longitude: -1.5536 },
+  { name: "Vertical'Art - Rungis", latitude: 48.7418, longitude: 2.3502 },
+  { name: "Climb Up - Bordeaux Mérignac", latitude: 44.8378, longitude: -0.5792 },
+  { name: "Block Out - Lille", latitude: 50.6292, longitude: 3.0573 },
+  { name: "B'UP - Clermont-Ferrand", latitude: 45.7772, longitude: 3.0870 },
+  { name: "Arkose - Massy", latitude: 48.7264, longitude: 2.2918 },
+  { name: "Blocbuster - Courbevoie", latitude: 48.8960, longitude: 2.2562 },
+  { name: "Kern'Up - Rouen", latitude: 49.4432, longitude: 1.0993 },
+  { name: "Espace Vertical 3 - Grenoble", latitude: 45.1885, longitude: 5.7245 },
+  { name: "La Zipette - Voglans", latitude: 45.6490, longitude: 5.9160 },
+  { name: "Arkose - Bordeaux", latitude: 44.8378, longitude: -0.5792 },
+  { name: "Hardbloc - Alfortville", latitude: 48.8150, longitude: 2.4199 },
+  { name: "Climb Up - Lille Lesquin", latitude: 50.5840, longitude: 3.0980 },
+  { name: "Climb Up - Lyon Confluence", latitude: 45.7380, longitude: 4.8147 },
+  { name: "Arkose - Toulouse", latitude: 43.6047, longitude: 1.4442 },
+  { name: "Modjo-Escalade - Rennes", latitude: 48.1173, longitude: -1.6778 },
+  { name: "M'Roc Laennec - Lyon", latitude: 45.7440, longitude: 4.8430 },
+  { name: "The Roof - Poitiers", latitude: 46.5802, longitude: 0.3404 },
+  { name: "Duo des Cimes - Gap", latitude: 44.5594, longitude: 6.0793 },
 ];
 
 // Fonction pour générer une salle d'escalade aléatoire
-const generateSalle = (adminId: number, localisationId: number, city: string) => {
-  const salleNames = [
-    "Bloc & Co",
-    "Vertical Art",
-    "Climb Up",
-    "Arkose",
-    "Block'Out",
-    "Murmur",
-    "Altitude",
-    "Vertical",
-    "Grimper",
-    "Escalade Plus"
+const generateSalle = (adminId: number, localisationId: number, salleName: string) => {
+  const descriptions = [
+    "Salle d'escalade avec des voies de toutes difficultés",
+    "Salle d'escalade avec des voies de difficulté moyenne",
+    "Salle d'escalade avec des voies de difficulté facile",
+    "Salle d'escalade avec des voies de difficulté difficile",
+    "Salle d'escalade avec des voies de difficulté très difficile",
   ];
-
-  const salleName = faker.helpers.arrayElement(salleNames);
-
+  const telephone = `06 ${faker.string.numeric(2)} ${faker.string.numeric(2)} ${faker.string.numeric(2)} ${faker.string.numeric(2)}`;
+  const description = faker.helpers.arrayElement(descriptions);
   return {
     admin_id: adminId,
     localisation: localisationId,
-    description: faker.lorem.paragraph(),
-    email: faker.internet.email({ firstName: salleName, lastName: city }),
-    telephone: faker.phone.number('0# ## ## ## ##'),
-    nom: `${salleName} ${city}`
+    description,
+    email: faker.internet.email({ firstName: salleName }),
+    telephone,
+    nom: salleName
   };
 };
 
@@ -74,12 +78,10 @@ const insertSalles = async (): Promise<void> => {
 
     const userIds = users.map(user => user.id);
 
-    // Générer 8 salles
+    // Générer une salle pour chaque gym de la liste
     const salles = [];
-    for (let i = 0; i < 8; i++) {
-      // Choisir une ville aléatoire
-      const cityObj = faker.helpers.arrayElement(frenchCities);
-      const city = cityObj.name;
+    for (const cityObj of frenchClimbingGyms) {
+      const salleName = cityObj.name;
       const location = {
         latitude: cityObj.latitude,
         longitude: cityObj.longitude
@@ -98,7 +100,7 @@ const insertSalles = async (): Promise<void> => {
       const salle = generateSalle(
         faker.helpers.arrayElement(userIds),
         locationData.id,
-        city
+        salleName
       );
 
       const { data: salleData, error: salleError } = await supabase
@@ -112,7 +114,7 @@ const insertSalles = async (): Promise<void> => {
       }
 
       salles.push(salleData);
-      console.log(`✅ Salle "${salleData.nom}" créée avec succès`);
+      console.log(`✅ Salle ${salleData.nom} créée avec succès`);
     }
 
     console.log(`✅ ${salles.length} salles ont été créées avec succès`);
