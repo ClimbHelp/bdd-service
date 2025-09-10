@@ -72,9 +72,6 @@ export class VoieController {
     try {
       const { salle_id, nom, cotation, description, ouvreur, type_de_voie } = req.body;
 
-      // Debug: Log des données reçues
-      console.log('Données reçues:', { salle_id, nom, cotation, description, ouvreur, type_de_voie });
-
       // Validation
       if (!salle_id) {
         return res.status(400).json({ 
@@ -92,14 +89,7 @@ export class VoieController {
         type_de_voie
       };
 
-      // Debug: Log des données à envoyer
-      console.log('Données à envoyer à la DB:', voieData);
-
       const newVoie = await voieService.create(voieData);
-      
-      // Debug: Log de la réponse
-      console.log('Voie créée:', newVoie);
-      
       res.status(201).json({ success: true, data: newVoie });
     } catch (error) {
       console.error('Error creating voie:', error);
