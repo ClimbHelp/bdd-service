@@ -70,7 +70,7 @@ export class VoieController {
   // POST /api/voies
   static async createVoie(req: Request, res: Response) {
     try {
-      const { salle_id, cotation, description, ouvreur, type_de_voie } = req.body;
+      const { salle_id, nom, cotation, description, ouvreur, type_de_voie } = req.body;
 
       // Validation
       if (!salle_id) {
@@ -82,6 +82,7 @@ export class VoieController {
 
       const voieData: Partial<Voie> = {
         salle_id,
+        nom,
         cotation,
         description,
         ouvreur,
@@ -110,9 +111,10 @@ export class VoieController {
         });
       }
 
-      const { cotation, description, ouvreur, type_de_voie } = req.body;
+      const { nom, cotation, description, ouvreur, type_de_voie } = req.body;
       const updateData: Partial<Voie> = {};
 
+      if (nom !== undefined) updateData.nom = nom;
       if (cotation !== undefined) updateData.cotation = cotation;
       if (description !== undefined) updateData.description = description;
       if (ouvreur !== undefined) updateData.ouvreur = ouvreur;
