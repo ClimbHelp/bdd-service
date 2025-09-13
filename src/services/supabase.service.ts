@@ -118,6 +118,25 @@ export class SupabaseService<T> {
     return data || [];
   }
 
+  // READ - Get all with pagination
+  async getAllPaginated(limit: number = 10, offset: number = 0): Promise<{ data: T[], total: number }> {
+    const { data, error, count } = await supabase
+      .from(this.tableName)
+      .select('*', { count: 'exact' })
+      .order('id', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error(`Error fetching ${this.tableName} with pagination:`, error);
+      throw error;
+    }
+
+    return { 
+      data: data || [], 
+      total: count || 0 
+    };
+  }
+
   // READ - Get by ID
   async getById(id: number): Promise<T | null> {
     const { data, error } = await supabase
@@ -180,6 +199,31 @@ export class SupabaseService<T> {
     }
 
     return data || [];
+  }
+
+  // Custom query with filters and pagination
+  async queryPaginated(filters: Record<string, any>, limit: number = 10, offset: number = 0): Promise<{ data: T[], total: number }> {
+    let query = supabase.from(this.tableName).select('*', { count: 'exact' });
+    
+    Object.entries(filters).forEach(([key, value]) => {
+      query = query.eq(key, value);
+    });
+
+    // Trier par ID décroissant (plus récent en premier)
+    query = query.order('id', { ascending: false });
+    query = query.range(offset, offset + limit - 1);
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      console.error(`Error querying ${this.tableName} with pagination:`, error);
+      throw error;
+    }
+
+    return { 
+      data: data || [], 
+      total: count || 0 
+    };
   }
 }
 

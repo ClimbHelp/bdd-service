@@ -89,11 +89,13 @@ router.delete("/voies/:id", VoieController.deleteVoie);
 
 // Routes CRUD pour les séances
 router.get("/seances", SeanceController.getAllSeances);
+router.get("/seances/paginated", SeanceController.getAllSeancesPaginated);
 router.get("/seances/search", SeanceController.searchSeances);
 router.get("/seances/date-range", SeanceController.getSeancesByDateRange);
 router.get("/seances/:id", SeanceController.getSeanceById);
 router.get("/seances/:id/complete", SeanceController.getSeanceWithVoies);
 router.get("/seances/user/:userId", SeanceController.getSeancesByUserId);
+router.get("/seances/user/:userId/paginated", SeanceController.getSeancesByUserIdPaginated);
 router.get("/seances/user/:userId/stats", SeanceController.getUserStats);
 router.post("/seances", SeanceController.createSeance);
 router.put("/seances/:id", SeanceController.updateSeance);

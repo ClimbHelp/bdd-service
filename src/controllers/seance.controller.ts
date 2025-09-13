@@ -17,6 +17,48 @@ export class SeanceController {
     }
   }
 
+  // GET /api/seances/paginated?limit=10&offset=0
+  static async getAllSeancesPaginated(req: Request, res: Response) {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      // Validation des paramètres
+      if (limit < 1 || limit > 100) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Limit must be between 1 and 100' 
+        });
+      }
+
+      if (offset < 0) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Offset must be 0 or greater' 
+        });
+      }
+
+      const result = await seanceService.getAllPaginated(limit, offset);
+      
+      res.json({ 
+        success: true, 
+        data: result.data,
+        pagination: {
+          limit,
+          offset,
+          total: result.total,
+          hasMore: offset + limit < result.total
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching seances with pagination:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch seances with pagination' 
+      });
+    }
+  }
+
   // GET /api/seances/:id
   static async getSeanceById(req: Request, res: Response) {
     try {
@@ -64,6 +106,56 @@ export class SeanceController {
       res.status(500).json({ 
         success: false, 
         error: 'Failed to fetch seances by user ID' 
+      });
+    }
+  }
+
+  // GET /api/seances/user/:userId/paginated?limit=10&offset=0
+  static async getSeancesByUserIdPaginated(req: Request, res: Response) {
+    try {
+      const userId = parseInt(req.params.userId);
+      if (isNaN(userId)) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Invalid user ID' 
+        });
+      }
+
+      const limit = parseInt(req.query.limit as string) || 10;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      // Validation des paramètres
+      if (limit < 1 || limit > 100) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Limit must be between 1 and 100' 
+        });
+      }
+
+      if (offset < 0) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Offset must be 0 or greater' 
+        });
+      }
+
+      const result = await seanceService.queryPaginated({ user_id: userId }, limit, offset);
+      
+      res.json({ 
+        success: true, 
+        data: result.data,
+        pagination: {
+          limit,
+          offset,
+          total: result.total,
+          hasMore: offset + limit < result.total
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching seances by user ID with pagination:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch seances by user ID with pagination' 
       });
     }
   }
@@ -355,7 +447,6 @@ export class SeanceController {
           )
         : null;
 
-        console.log(niveauMax);
 
       res.json({
         success: true,

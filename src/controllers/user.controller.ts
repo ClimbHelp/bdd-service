@@ -47,7 +47,6 @@ async function sendWelcomeEmail(userEmail: string, username: string, userId: num
       LogService.insertHttpLogAsync(emailLog);
     } else {
       const responseData = await response.json() as NotificationResponse;
-      console.log('Welcome email sent successfully to:', userEmail);
       
       // Logger le succès dans la table http_logs existante
       const emailLog: HttpLog = {
